@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useState, useEffect } from "react";
 
 type NetworkInfo = {
@@ -71,7 +72,7 @@ const Page = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-gray-100 min-h-screen">
+    <div className="flex flex-col items-center justify-center p-8 bg-white h-full">
       <div className="w-full max-w-5xl">
         <div className="relative border border-gray-300 p-6 rounded-lg bg-white shadow">
           <h1 className="absolute -top-3 left-4 bg-white px-2 text-lg font-mono">
@@ -158,24 +159,33 @@ const Page = () => {
                 </div>
               )}
               <p className="mt-4 text-center text-xs text-gray-500 font-mono">
-                Thank you{" "}
-                <a
+                Thank You{" "}
+                <Link
                   href="https://ipify.org"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:underline"
                 >
                   ipify.org
-                </a>
-                , and{" "}
-                <a
+                </Link>
+                ,{" "}
+                <Link
+                  href="https://ipapi.co"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  ipapi.co
+                </Link>{" "}
+                and{" "}
+                <Link
                   href="https://openstreetmap.org"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:underline"
                 >
                   openstreetmap.org
-                </a>{" "}
+                </Link>{" "}
                 ❤️
               </p>
             </>
