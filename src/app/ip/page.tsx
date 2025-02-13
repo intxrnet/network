@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 
 type NetworkInfo = {
   ipv4?: string;
@@ -16,6 +17,14 @@ type NetworkInfo = {
   longitude?: number;
   [key: string]: any;
 };
+
+// Dynamically import the map component with no SSR
+const MapWithNoSSR = dynamic(() => import("./map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[300px] bg-gray-100 rounded-lg animate-pulse" />
+  ),
+});
 
 const Page = () => {
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
@@ -63,13 +72,6 @@ const Page = () => {
   useEffect(() => {
     fetchNetworkInfo();
   }, []);
-
-  // Construct a static map URL (non-interactive, fixed zoom level)
-  let mapUrl = "";
-  if (networkInfo && networkInfo.latitude && networkInfo.longitude) {
-    // Using OpenStreetMap's static map API with a higher zoom level and larger size
-    mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${networkInfo.latitude},${networkInfo.longitude}&zoom=13&size=800x400&markers=${networkInfo.latitude},${networkInfo.longitude},lightblue`;
-  }
 
   return (
     <div className="flex flex-col items-center justify-center p-8 bg-white h-full">
@@ -142,20 +144,13 @@ const Page = () => {
                   </p>
                 </div>
               </div>
-              {/* Map Snippet */}
+              {/* Interactive Leaflet Map */}
               {networkInfo.latitude && networkInfo.longitude && (
-                <div className="relative mt-6 col-span-2">
-                  <div className="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
-                    <img
-                      src={mapUrl}
-                      alt="Location Map"
-                      className="w-full h-[300px] object-cover"
-                    />
-                    {/* Static Circle Marker Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-4 h-4 border-4 border-blue-500 rounded-full bg-blue-200"></div>
-                    </div>
-                  </div>
+                <div className="mt-6 col-span-2 rounded-lg overflow-hidden border border-gray-200">
+                  <MapWithNoSSR
+                    latitude={networkInfo.latitude}
+                    longitude={networkInfo.longitude}
+                  />
                 </div>
               )}
               <p className="mt-4 text-center text-xs text-gray-500 font-mono">
