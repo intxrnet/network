@@ -15,7 +15,16 @@ type NetworkInfo = {
   timezone?: string;
   latitude?: number;
   longitude?: number;
-  [key: string]: any;
+  org?: string;
+  asn?: string;
+  isp?: string;
+  continent_code?: string;
+  currency?: string;
+  languages?: string;
+  country_code?: string;
+  country_area?: number;
+  country_population?: number;
+  utc_offset?: string;
 };
 
 // Dynamically import the map component with no SSR
