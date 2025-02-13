@@ -1,34 +1,37 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Copy, RefreshCw, Trash2 } from "lucide-react";
+import { Copy, RefreshCw } from "lucide-react";
 
-const PasswordGeneratorPlayground = () => {
+const PasswordGeneratorPlayground: React.FC = () => {
   // Generation type: "password" (normal), "passphrase", "pin", "bulk"
-  const [generationType, setGenerationType] = useState("password");
+  const [generationType, setGenerationType] = useState<
+    "password" | "passphrase" | "pin" | "bulk"
+  >("password");
   // The generated (or manually edited) password output
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState<string>("");
   // For normal password & PIN length OR passphrase word count
-  const [passwordLength, setPasswordLength] = useState(16);
+  const [passwordLength, setPasswordLength] = useState<number>(16);
   // For bulk generation: how many passwords to generate
-  const [bulkCount, setBulkCount] = useState(5);
+  const [bulkCount, setBulkCount] = useState<number>(5);
 
   // Options for normal password generation
-  const [includeUppercase, setIncludeUppercase] = useState(true);
-  const [includeLowercase, setIncludeLowercase] = useState(true);
-  const [includeNumbers, setIncludeNumbers] = useState(true);
-  const [includeSymbols, setIncludeSymbols] = useState(true);
-  const [excludeAmbiguous, setExcludeAmbiguous] = useState(false);
-  const [excludeSequential, setExcludeSequential] = useState(false);
-  const [forceStartWithLetter, setForceStartWithLetter] = useState(false);
+  const [includeUppercase, setIncludeUppercase] = useState<boolean>(true);
+  const [includeLowercase, setIncludeLowercase] = useState<boolean>(true);
+  const [includeNumbers, setIncludeNumbers] = useState<boolean>(true);
+  const [includeSymbols, setIncludeSymbols] = useState<boolean>(true);
+  const [excludeAmbiguous, setExcludeAmbiguous] = useState<boolean>(false);
+  const [excludeSequential, setExcludeSequential] = useState<boolean>(false);
+  const [forceStartWithLetter, setForceStartWithLetter] =
+    useState<boolean>(false);
 
   // Options for passphrase generation
-  const [wordSeparator, setWordSeparator] = useState("-");
+  const [wordSeparator, setWordSeparator] = useState<string>("-");
   const [passphraseCapitalization, setPassphraseCapitalization] =
-    useState(false);
+    useState<boolean>(false);
 
   // A small word list for passphrase generation
-  const wordList = [
+  const wordList: string[] = [
     "alpha",
     "bravo",
     "charlie",
@@ -71,38 +74,12 @@ const PasswordGeneratorPlayground = () => {
     "blazing",
   ];
 
-  // Auto-generate a password on page load
-  useEffect(() => {
-    generatePassword();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Main generate function (switches based on generation type)
-  const generatePassword = () => {
-    let newPassword = "";
-    if (generationType === "password") {
-      newPassword = generateNormalPassword();
-    } else if (generationType === "passphrase") {
-      newPassword = generatePassphrase();
-    } else if (generationType === "pin") {
-      newPassword = generatePin();
-    } else if (generationType === "bulk") {
-      let passwords = [];
-      for (let i = 0; i < bulkCount; i++) {
-        passwords.push(generateNormalPassword());
-      }
-      newPassword = passwords.join("\n");
-    }
-    setPassword(newPassword);
-  };
-
   // --------------------------
   // Generation Functions
   // --------------------------
 
   // Generate a normal password based on selected options
-  const generateNormalPassword = () => {
-    // Define basic character sets
+  const generateNormalPassword = (): string => {
     let lower = "abcdefghijklmnopqrstuvwxyz";
     let upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let numbers = "0123456789";
@@ -132,9 +109,7 @@ const PasswordGeneratorPlayground = () => {
     if (includeNumbers) charPool += numbers;
     if (includeSymbols) charPool += symbols;
     if (!charPool) return "";
-
     let result = "";
-    // If forced to start with a letter, choose from lower+upper if available
     if (forceStartWithLetter) {
       let letterPool = "";
       if (includeLowercase) letterPool += lower;
@@ -145,14 +120,11 @@ const PasswordGeneratorPlayground = () => {
         result += charPool[Math.floor(Math.random() * charPool.length)];
       }
     }
-    // Build the rest of the password
     while (result.length < passwordLength) {
-      let randomChar = charPool[Math.floor(Math.random() * charPool.length)];
+      const randomChar = charPool[Math.floor(Math.random() * charPool.length)];
       if (excludeSequential && result.length > 0) {
         const prevChar = result[result.length - 1];
-        // Exclude duplicate characters...
         if (randomChar === prevChar) continue;
-        // ...and avoid sequential characters (adjacent char codes differ by 1)
         if (Math.abs(randomChar.charCodeAt(0) - prevChar.charCodeAt(0)) === 1)
           continue;
       }
@@ -162,21 +134,21 @@ const PasswordGeneratorPlayground = () => {
   };
 
   // Generate a passphrase by selecting random words from the word list
-  const generatePassphrase = () => {
-    let words = [];
-    const wordCount = passwordLength; // here, passwordLength is treated as word count
+  const generatePassphrase = (): string => {
+    const wordsArr: string[] = [];
+    const wordCount = passwordLength; // treat passwordLength as word count
     for (let i = 0; i < wordCount; i++) {
       let word = wordList[Math.floor(Math.random() * wordList.length)];
       if (passphraseCapitalization) {
         word = word.charAt(0).toUpperCase() + word.slice(1);
       }
-      words.push(word);
+      wordsArr.push(word);
     }
-    return words.join(wordSeparator);
+    return wordsArr.join(wordSeparator);
   };
 
   // Generate a numeric-only PIN
-  const generatePin = () => {
+  const generatePin = (): string => {
     let result = "";
     const digits = "0123456789";
     for (let i = 0; i < passwordLength; i++) {
@@ -185,46 +157,110 @@ const PasswordGeneratorPlayground = () => {
     return result;
   };
 
+  // Main generate function (switches based on generation type)
+  const generatePassword = (): void => {
+    let newPassword = "";
+    if (generationType === "password") {
+      newPassword = generateNormalPassword();
+    } else if (generationType === "passphrase") {
+      newPassword = generatePassphrase();
+    } else if (generationType === "pin") {
+      newPassword = generatePin();
+    } else if (generationType === "bulk") {
+      const passwords: string[] = [];
+      for (let i = 0; i < bulkCount; i++) {
+        passwords.push(generateNormalPassword());
+      }
+      newPassword = passwords.join("\n");
+    }
+    setPassword(newPassword);
+  };
+
+  // --------------------------
+  // Auto-Regeneration Hooks
+  // --------------------------
+  // Whenever any generation option changes, regenerate the password.
+  useEffect(() => {
+    generatePassword();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    generationType,
+    passwordLength,
+    bulkCount,
+    includeUppercase,
+    includeLowercase,
+    includeNumbers,
+    includeSymbols,
+    excludeAmbiguous,
+    excludeSequential,
+    forceStartWithLetter,
+    wordSeparator,
+    passphraseCapitalization,
+  ]);
+
   // --------------------------
   // Strength & Crack Time
   // --------------------------
+  // These helper functions calculate entropy based on the actual password content.
 
-  // Compute entropy (in bits) based on generation type and settings
-  const computeEntropy = () => {
-    let entropy = 0;
-    if (generationType === "password" || generationType === "bulk") {
-      let pool = 0;
-      if (includeLowercase) pool += 26;
-      if (includeUppercase) pool += 26;
-      if (includeNumbers) pool += 10;
-      if (includeSymbols) pool += 32; // roughly 32 symbols available
-      if (excludeAmbiguous) {
-        pool = Math.max(pool - 5, 1);
-      }
-      entropy = passwordLength * Math.log2(pool);
-    } else if (generationType === "passphrase") {
-      entropy = passwordLength * Math.log2(wordList.length);
-    } else if (generationType === "pin") {
-      entropy = passwordLength * Math.log2(10);
-    }
-    return entropy;
+  const computePasswordEntropy = (pwd: string): number => {
+    let pool = 0;
+    if (/[a-z]/.test(pwd)) pool += 26;
+    if (/[A-Z]/.test(pwd)) pool += 26;
+    if (/[0-9]/.test(pwd)) pool += 10;
+    if (/[^a-zA-Z0-9]/.test(pwd)) pool += 32;
+    return pwd.length * Math.log2(pool || 1);
   };
 
-  // Return a strength label based on entropy value
-  const getStrengthLabel = (entropy: number) => {
-    if (entropy < 40) return "Weak";
-    else if (entropy < 60) return "Moderate";
-    else if (entropy < 80) return "Strong";
+  const computePassphraseEntropy = (pwd: string): number => {
+    const wordsArr = pwd.split(wordSeparator).filter((word) => word !== "");
+    return wordsArr.length * Math.log2(wordList.length);
+  };
+
+  const computePinEntropy = (pwd: string): number => {
+    return pwd.length * Math.log2(10);
+  };
+
+  const computeEntropy = (): number => {
+    if (!password) return 0;
+    switch (generationType) {
+      case "password":
+        return computePasswordEntropy(password);
+      case "bulk": {
+        const lines = password.split("\n").filter((line) => line.trim() !== "");
+        if (lines.length === 0) return 0;
+        // Average entropy of each line
+        const total = lines.reduce(
+          (acc, line) => acc + computePasswordEntropy(line),
+          0
+        );
+        return total / lines.length;
+      }
+      case "passphrase":
+        return computePassphraseEntropy(password);
+      case "pin":
+        return computePinEntropy(password);
+      default:
+        return 0;
+    }
+  };
+
+  const entropy = computeEntropy();
+
+  const getStrengthLabel = (entropyValue: number): string => {
+    if (entropyValue < 40) return "Weak";
+    else if (entropyValue < 60) return "Moderate";
+    else if (entropyValue < 80) return "Strong";
     else return "Very Strong";
   };
 
-  // Format estimated crack time (assuming 10^10 guesses per second)
-  const formatCrackTime = (entropy: number) => {
+  const strengthLabel = getStrengthLabel(entropy);
+
+  const formatCrackTime = (entropyValue: number): string => {
     const guessesPerSecond = 1e10;
-    const totalGuesses = Math.pow(2, entropy);
+    const totalGuesses = Math.pow(2, entropyValue);
     const seconds = totalGuesses / guessesPerSecond;
     if (seconds < 1) return "less than a second";
-    // If astronomical, say "practically uncrackable"
     if (seconds > 1e20) return "practically uncrackable";
 
     let time = seconds;
@@ -235,7 +271,7 @@ const PasswordGeneratorPlayground = () => {
       { unit: "minute", sec: 60 },
       { unit: "second", sec: 1 },
     ];
-    let result = [];
+    const result: string[] = [];
     for (const { unit, sec } of units) {
       const quotient = Math.floor(time / sec);
       if (quotient > 0) {
@@ -246,15 +282,12 @@ const PasswordGeneratorPlayground = () => {
     return result.join(", ");
   };
 
-  const entropy = computeEntropy();
-  const strengthLabel = getStrengthLabel(entropy);
   const crackTime = formatCrackTime(entropy);
 
   // --------------------------
   // Handlers
   // --------------------------
-
-  const handleCopy = async () => {
+  const handleCopy = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(password);
       alert("Password copied to clipboard!");
@@ -265,14 +298,13 @@ const PasswordGeneratorPlayground = () => {
 
   const handlePasswordChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  ): void => {
     setPassword(e.target.value);
   };
 
   // --------------------------
   // Render UI
   // --------------------------
-
   return (
     <div className="flex flex-col h-[90vh] w-full p-4 bg-white">
       {/* Header & Actions */}
@@ -284,7 +316,11 @@ const PasswordGeneratorPlayground = () => {
             <label className="text-sm font-medium">Type:</label>
             <select
               value={generationType}
-              onChange={(e) => setGenerationType(e.target.value)}
+              onChange={(e) =>
+                setGenerationType(
+                  e.target.value as "password" | "passphrase" | "pin" | "bulk"
+                )
+              }
               className="px-2 py-1 border rounded-md bg-white"
             >
               <option value="password">Password</option>
