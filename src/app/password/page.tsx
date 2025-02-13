@@ -306,212 +306,217 @@ const PasswordGeneratorPlayground: React.FC = () => {
   // Render UI
   // --------------------------
   return (
-    <div className="flex flex-col h-[90vh] w-full p-4 bg-white">
-      {/* Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-        <h1 className="text-2xl font-mono">Password Generator Playground</h1>
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Generation Type Selector */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Type:</label>
-            <select
-              value={generationType}
-              onChange={(e) =>
-                setGenerationType(
-                  e.target.value as "password" | "passphrase" | "pin" | "bulk"
-                )
-              }
-              className="px-2 py-1 border rounded-md bg-white"
-            >
-              <option value="password">Password</option>
-              <option value="passphrase">Passphrase</option>
-              <option value="pin">PIN</option>
-              <option value="bulk">Bulk</option>
-            </select>
-          </div>
-          {/* Regenerate & Copy Buttons */}
-          <button
-            onClick={generatePassword}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 border rounded-md hover:bg-blue-100"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Regenerate
-          </button>
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 border rounded-md hover:bg-gray-100"
-          >
-            <Copy className="w-4 h-4" />
-            Copy
-          </button>
-        </div>
-      </div>
-
-      {/* Editable Password / Output Field */}
-      <div className="mb-4">
-        {generationType === "bulk" ? (
-          <textarea
-            value={password}
-            onChange={handlePasswordChange}
-            rows={Math.min(bulkCount, 10)}
-            className="w-full p-2 border rounded-md font-mono text-sm resize-none"
-          />
-        ) : (
-          <input
-            type="text"
-            value={password}
-            onChange={handlePasswordChange}
-            className="w-full p-2 border rounded-md font-mono text-sm"
-          />
-        )}
-      </div>
-
-      {/* Strength & Estimated Crack Time */}
-      <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600">
-        <span>
-          Strength: <strong>{strengthLabel}</strong>
-        </span>
-        <span>Entropy: {entropy.toFixed(2)} bits</span>
-        <span>Estimated Crack Time: {crackTime}</span>
-      </div>
-
-      {/* Customization Options */}
-      <div className="flex flex-col gap-4">
-        {/* Length / Word Count / PIN Length */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600">
-            {generationType === "passphrase" ? "Word Count:" : "Length:"}{" "}
-            {passwordLength}
-          </label>
-          <input
-            type="range"
-            min={
-              generationType === "pin"
-                ? 4
-                : generationType === "passphrase"
-                ? 3
-                : 8
-            }
-            max={
-              generationType === "pin"
-                ? 12
-                : generationType === "passphrase"
-                ? 8
-                : 32
-            }
-            value={passwordLength}
-            onChange={(e) => setPasswordLength(Number(e.target.value))}
-            className="flex-grow"
-          />
-          {generationType === "bulk" && (
+    <div className="flex flex-col h-full w-full p-8 bg-white">
+      <div className="relative w-full max-w-4xl mx-auto border border-gray-200 rounded-lg p-6">
+        <h1 className="absolute -top-3 left-4 bg-white px-2 text-lg font-mono">
+          Password Generator Playground
+        </h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Generation Type Selector */}
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">
-                Bulk Count: {bulkCount}
-              </label>
-              <input
-                type="range"
-                min={2}
-                max={20}
-                value={bulkCount}
-                onChange={(e) => setBulkCount(Number(e.target.value))}
-                className="flex-grow"
-              />
+              <label className="text-sm font-medium">Type:</label>
+              <select
+                value={generationType}
+                onChange={(e) =>
+                  setGenerationType(
+                    e.target.value as "password" | "passphrase" | "pin" | "bulk"
+                  )
+                }
+                className="px-2 py-1 border rounded-md bg-white"
+              >
+                <option value="password">Password</option>
+                <option value="passphrase">Passphrase</option>
+                <option value="pin">PIN</option>
+                <option value="bulk">Bulk</option>
+              </select>
             </div>
+            {/* Regenerate & Copy Buttons */}
+            <button
+              onClick={generatePassword}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 border rounded-md hover:bg-blue-100"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Regenerate
+            </button>
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 border rounded-md hover:bg-gray-100"
+            >
+              <Copy className="w-4 h-4" />
+              Copy
+            </button>
+          </div>
+        </div>
+
+        {/* Editable Password / Output Field */}
+        <div className="mb-4">
+          {generationType === "bulk" ? (
+            <textarea
+              value={password}
+              onChange={handlePasswordChange}
+              rows={Math.min(bulkCount, 10)}
+              className="w-full p-2 border rounded-md font-mono text-sm resize-none"
+            />
+          ) : (
+            <input
+              type="text"
+              value={password}
+              onChange={handlePasswordChange}
+              className="w-full p-2 border rounded-md font-mono text-sm"
+            />
           )}
         </div>
 
-        {/* Options for normal password generation */}
-        {(generationType === "password" || generationType === "bulk") && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={includeUppercase}
-                onChange={(e) => setIncludeUppercase(e.target.checked)}
-                className="form-checkbox"
-              />
-              Uppercase Letters (A-Z)
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={includeLowercase}
-                onChange={(e) => setIncludeLowercase(e.target.checked)}
-                className="form-checkbox"
-              />
-              Lowercase Letters (a-z)
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={includeNumbers}
-                onChange={(e) => setIncludeNumbers(e.target.checked)}
-                className="form-checkbox"
-              />
-              Numbers (0-9)
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={includeSymbols}
-                onChange={(e) => setIncludeSymbols(e.target.checked)}
-                className="form-checkbox"
-              />
-              Symbols &amp; Special Characters
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={excludeAmbiguous}
-                onChange={(e) => setExcludeAmbiguous(e.target.checked)}
-                className="form-checkbox"
-              />
-              Avoid Ambiguous Characters (I, l, 1, O, 0)
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={excludeSequential}
-                onChange={(e) => setExcludeSequential(e.target.checked)}
-                className="form-checkbox"
-              />
-              Exclude Sequential/Duplicate Characters
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={forceStartWithLetter}
-                onChange={(e) => setForceStartWithLetter(e.target.checked)}
-                className="form-checkbox"
-              />
-              Force Password to Start with a Letter
-            </label>
-          </div>
-        )}
+        {/* Strength & Estimated Crack Time */}
+        <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600">
+          <span>
+            Strength: <strong>{strengthLabel}</strong>
+          </span>
+          <span>Entropy: {entropy.toFixed(2)} bits</span>
+          <span>Estimated Crack Time: {crackTime}</span>
+        </div>
 
-        {/* Options for passphrase generation */}
-        {generationType === "passphrase" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <label className="flex items-center gap-2 text-sm">
-              Word Separator:
-              <input
-                type="text"
-                value={wordSeparator}
-                onChange={(e) => setWordSeparator(e.target.value)}
-                className="px-2 py-1 border rounded-md w-16"
-              />
+        {/* Customization Options */}
+        <div className="flex flex-col gap-4">
+          {/* Length / Word Count / PIN Length */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600">
+              {generationType === "passphrase" ? "Word Count:" : "Length:"}{" "}
+              {passwordLength}
             </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={passphraseCapitalization}
-                onChange={(e) => setPassphraseCapitalization(e.target.checked)}
-                className="form-checkbox"
-              />
-              Include Capitalization
-            </label>
+            <input
+              type="range"
+              min={
+                generationType === "pin"
+                  ? 4
+                  : generationType === "passphrase"
+                  ? 3
+                  : 8
+              }
+              max={
+                generationType === "pin"
+                  ? 12
+                  : generationType === "passphrase"
+                  ? 8
+                  : 32
+              }
+              value={passwordLength}
+              onChange={(e) => setPasswordLength(Number(e.target.value))}
+              className="flex-grow"
+            />
+            {generationType === "bulk" && (
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">
+                  Bulk Count: {bulkCount}
+                </label>
+                <input
+                  type="range"
+                  min={2}
+                  max={20}
+                  value={bulkCount}
+                  onChange={(e) => setBulkCount(Number(e.target.value))}
+                  className="flex-grow"
+                />
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Options for normal password generation */}
+          {(generationType === "password" || generationType === "bulk") && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={includeUppercase}
+                  onChange={(e) => setIncludeUppercase(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Uppercase Letters (A-Z)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={includeLowercase}
+                  onChange={(e) => setIncludeLowercase(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Lowercase Letters (a-z)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={includeNumbers}
+                  onChange={(e) => setIncludeNumbers(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Numbers (0-9)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={includeSymbols}
+                  onChange={(e) => setIncludeSymbols(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Symbols &amp; Special Characters
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={excludeAmbiguous}
+                  onChange={(e) => setExcludeAmbiguous(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Avoid Ambiguous Characters (I, l, 1, O, 0)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={excludeSequential}
+                  onChange={(e) => setExcludeSequential(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Exclude Sequential/Duplicate Characters
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={forceStartWithLetter}
+                  onChange={(e) => setForceStartWithLetter(e.target.checked)}
+                  className="form-checkbox"
+                />
+                Force Password to Start with a Letter
+              </label>
+            </div>
+          )}
+
+          {/* Options for passphrase generation */}
+          {generationType === "passphrase" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <label className="flex items-center gap-2 text-sm">
+                Word Separator:
+                <input
+                  type="text"
+                  value={wordSeparator}
+                  onChange={(e) => setWordSeparator(e.target.value)}
+                  className="px-2 py-1 border rounded-md w-16"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={passphraseCapitalization}
+                  onChange={(e) =>
+                    setPassphraseCapitalization(e.target.checked)
+                  }
+                  className="form-checkbox"
+                />
+                Include Capitalization
+              </label>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
