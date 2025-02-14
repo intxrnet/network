@@ -107,7 +107,7 @@ const ApiPlayground = () => {
         }
       });
 
-      let bodyContent: Record<string, string> = {};
+      const bodyContent: Record<string, string> = {};
       bodyParams.forEach((param) => {
         if (param.enabled && param.key) {
           bodyContent[param.key] = param.value;
