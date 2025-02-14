@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/leaflet": "^1.9.16",
+    "crypto-js": "^4.2.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.475.0",
     "next": "15.1.5",
