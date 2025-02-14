@@ -64,7 +64,8 @@ const EncodingPage = () => {
         default:
           return text;
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(`Conversion from ${fromFormat} failed:`, err);
       return "Invalid input for selected format";
     }
   };
@@ -112,7 +113,8 @@ const EncodingPage = () => {
         default:
           return text;
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(`Conversion to ${toFormat} failed:`, err);
       return "Conversion error";
     }
   };
@@ -126,6 +128,7 @@ const EncodingPage = () => {
 
   useEffect(() => {
     handleConvert();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, inputFormat, outputFormat]);
 
   const handleCopy = async (text: string) => {

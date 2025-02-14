@@ -59,7 +59,8 @@ const EncryptionPage = () => {
         default:
           return "";
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(`Encryption failed for ${method}:`, err);
       return "Encryption failed";
     }
   };
@@ -96,7 +97,8 @@ const EncryptionPage = () => {
         default:
           return "";
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(`Decryption failed for ${method}:`, err);
       return "Decryption failed";
     }
   };
@@ -122,6 +124,7 @@ const EncryptionPage = () => {
 
   useEffect(() => {
     handleProcess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, passphrase, mode]);
 
   const handleCopy = async (text: string) => {
