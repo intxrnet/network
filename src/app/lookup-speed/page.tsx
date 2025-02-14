@@ -19,6 +19,12 @@ interface NetworkResult {
   error?: string;
 }
 
+interface NetworkConnection {
+  effectiveType?: string;
+  downlink?: number;
+  rtt?: number;
+}
+
 const NetworkAnalyzer = () => {
   const [target, setTarget] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,14 +33,15 @@ const NetworkAnalyzer = () => {
   const performDNSLookup = async (hostname: string): Promise<void> => {
     try {
       const startTime = performance.now();
-
-      // Using fetch with HEAD request to avoid downloading content
       const response = await fetch(`https://${hostname}`, {
         method: "HEAD",
-        mode: "no-cors", // This allows us to at least attempt the connection
+        mode: "no-cors",
       });
-
       const endTime = performance.now();
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       setResults((prev) => [
         ...prev,
@@ -45,13 +52,15 @@ const NetworkAnalyzer = () => {
           info: `Successfully resolved ${hostname}`,
         },
       ]);
-    } catch (error) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to resolve hostname";
       setResults((prev) => [
         ...prev,
         {
           step: "DNS Lookup",
           status: "error",
-          error: "Failed to resolve hostname",
+          error: errorMessage,
         },
       ]);
     }
@@ -63,18 +72,18 @@ const NetworkAnalyzer = () => {
     for (let i = 0; i < 3; i++) {
       try {
         const startTime = performance.now();
-        await fetch(`https://${hostname}`, {
+        const response = await fetch(`https://${hostname}`, {
           method: "HEAD",
           mode: "no-cors",
           cache: "no-store",
         });
+        if (!response.ok) continue;
         const endTime = performance.now();
         measurements.push(endTime - startTime);
 
-        // Add small delay between pings
         await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        // Continue with other measurements even if one fails
+      } catch (err: unknown) {
+        console.error(`Measurement ${i + 1} failed:`, err);
       }
     }
 
@@ -104,7 +113,9 @@ const NetworkAnalyzer = () => {
   };
 
   const getConnectionInfo = () => {
-    const connection = (navigator as any).connection;
+    const connection = (
+      navigator as Navigator & { connection?: NetworkConnection }
+    ).connection;
 
     if (connection) {
       setResults((prev) => [
@@ -142,13 +153,17 @@ const NetworkAnalyzer = () => {
       await performDNSLookup(hostname);
       await measureLatency(hostname);
       getConnectionInfo();
-    } catch (error) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to complete network analysis";
       setResults((prev) => [
         ...prev,
         {
           step: "Analysis",
           status: "error",
-          error: "Failed to complete network analysis",
+          error: errorMessage,
         },
       ]);
     } finally {
