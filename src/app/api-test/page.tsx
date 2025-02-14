@@ -6,12 +6,9 @@ import {
   Plus,
   Trash2,
   Copy,
-  Save,
   Download,
   Code,
   Loader2,
-  ChevronDown,
-  ChevronUp,
   FileJson,
   Settings,
 } from "lucide-react";
@@ -27,17 +24,28 @@ interface Parameter {
   enabled: boolean;
 }
 
+interface ApiResponse {
+  data: unknown;
+  headers: Record<string, string>;
+  status: number;
+  statusText: string;
+  url: string;
+}
+
+type ViewMode = "pretty" | "raw" | "headers";
+
 const ApiPlayground = () => {
   const [url, setUrl] = useState("");
   const [method, setMethod] = useState<Method>("GET");
   const [parameters, setParameters] = useState<Parameter[]>([]);
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<any>(null);
+  const [response, setResponse] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [showJsonEditor, setShowJsonEditor] = useState(false);
   const [editedJson, setEditedJson] = useState("");
   const [activeTab, setActiveTab] = useState<ParamType>("query");
+  const [viewMode, setViewMode] = useState<ViewMode>("pretty");
 
   const addParameter = (type: ParamType) => {
     const newParam: Parameter = {
@@ -99,7 +107,7 @@ const ApiPlayground = () => {
         }
       });
 
-      let bodyContent = {};
+      let bodyContent: Record<string, string> = {};
       bodyParams.forEach((param) => {
         if (param.enabled && param.key) {
           bodyContent[param.key] = param.value;
@@ -115,11 +123,24 @@ const ApiPlayground = () => {
       const endTime = performance.now();
       setResponseTime(Math.round(endTime - startTime));
 
+      const responseHeaders: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+
       const data = await response.json();
-      setResponse(data);
+      setResponse({
+        data,
+        headers: responseHeaders,
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+      });
       setEditedJson(JSON.stringify(data, null, 2));
-    } catch (err) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -279,14 +300,48 @@ const ApiPlayground = () => {
         {/* Right panel - Response */}
         <div className="border rounded-lg overflow-hidden bg-gray-50">
           <div className="border-b bg-white p-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileJson className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium">Response</span>
-              {responseTime && (
-                <span className="text-xs text-gray-500">
-                  ({responseTime}ms)
-                </span>
-              )}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <FileJson className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium">Response</span>
+                {responseTime && (
+                  <span className="text-xs text-gray-500">
+                    ({responseTime}ms)
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-1 text-sm">
+                <button
+                  onClick={() => setViewMode("pretty")}
+                  className={`px-2 py-1 rounded ${
+                    viewMode === "pretty"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  Pretty
+                </button>
+                <button
+                  onClick={() => setViewMode("raw")}
+                  className={`px-2 py-1 rounded ${
+                    viewMode === "raw"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  Raw
+                </button>
+                <button
+                  onClick={() => setViewMode("headers")}
+                  className={`px-2 py-1 rounded ${
+                    viewMode === "headers"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  Headers
+                </button>
+              </div>
             </div>
             {response && (
               <div className="flex items-center gap-2">
@@ -322,14 +377,30 @@ const ApiPlayground = () => {
             ) : error ? (
               <div className="text-red-600">{error}</div>
             ) : response ? (
-              showJsonEditor ? (
+              viewMode === "headers" ? (
+                <div className="space-y-1">
+                  <div className="font-bold text-gray-700">
+                    {response.status} {response.statusText}
+                  </div>
+                  {Object.entries(response.headers).map(([key, value]) => (
+                    <div key={key} className="grid grid-cols-3 gap-4">
+                      <span className="text-gray-600">{key}:</span>
+                      <span className="col-span-2 text-gray-800">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : viewMode === "raw" ? (
+                <pre className="whitespace-pre-wrap">
+                  {JSON.stringify(response.data)}
+                </pre>
+              ) : showJsonEditor ? (
                 <textarea
                   value={editedJson}
                   onChange={(e) => setEditedJson(e.target.value)}
                   className="w-full h-full p-2 font-mono text-sm border rounded-md"
                 />
               ) : (
-                <pre>{JSON.stringify(response, null, 2)}</pre>
+                <pre>{JSON.stringify(response.data, null, 2)}</pre>
               )
             ) : (
               <div className="text-gray-500">
